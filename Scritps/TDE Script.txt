@@ -1,0 +1,88 @@
+----1. Create Database Master Key(DMK):
+
+Use master;
+
+CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'BSLI@123';
+
+
+
+----2. Create Certificate:
+
+USE master;
+
+CREATE CERTIFICATE CERT_ARS_ECS_DD_213_UAT WITH SUBJECT= 'ARS_ECS_DD_TDE',EXPIRY_DATE = '20440630';  ------20 years expire
+
+
+--------GO
+
+
+----3. Create the TDE on database
+
+USE ARS_ECS_DD;
+
+GO
+
+CREATE DATABASE ENCRYPTION KEY WITH ALGORITHM = AES_256 ENCRYPTION BY SERVER CERTIFICATE CERT_ARS_ECS_DD_213_UAT;
+
+
+
+----4. Enable the TDE
+
+ALTER DATABASE ARS_ECS_DD SET ENCRYPTION ON;
+
+
+
+------5.Take the certificate backup
+
+--Use master;
+
+--GO
+
+--BACKUP SERVICE MASTER KEY TO FILE = 'G:\TDE_DoNotDelete\ServiceMasterKey_149_PROD.key'ENCRYPTION BY PASSWORD = 'prod@4321'
+
+--BACKUP MASTER KEY TO FILE = 'G:\TDE_DoNotDelete\MasterKey_149_PROD.key'ENCRYPTION BY PASSWORD = 'prod@4321'
+
+
+
+BACKUP CERTIFICATE CERT_ARS_ECS_DD_213_UAT TO FILE = 'C:\SQL_TDE_CERT\CERT_ARS_ECS_DD_213_UAT_Backup.cer'
+
+WITH PRIVATE KEY( FILE = 'C:\SQL_TDE_CERT\CERT_ARS_ECS_DD_213_UAT_backup.pvk', ENCRYPTION BY PASSWORD = 'BSLI@123');
+
+
+-----------------------------------********************-------------------------------------------------------------------------
+
+--For Certificate Restoration:
+
+
+----1. Create Database Master Key(DMK):
+
+--Use master;
+
+--CREATE MASTER KEY ENCRYPTION BY PASSWORD ='prod@4321';
+
+
+--Use master
+--go
+--create certificate CERT_ABFLTDCSAPDB1_211_PROD 
+--from file='I:\TDE_DoNotDelete\CERT_ABFLTDCSAPDB1_211_PROD_backup.cer'
+--with private key (file='I:\TDE_DoNotDelete\CERT_ABFLTDCSAPDB1_211_PROD_backup.pvk',
+--decryption By password='prod@4321')  
+
+
+select * from sys.dm_database_encryption_keys
+--select name,database_id,is_encrypted from sys.databases where is_encrypted='1'
+select * from sys.certificates
+
+SELECT DB_NAME(database_id) AS DatabaseName, encryption_state,
+encryption_state_desc =
+CASE encryption_state
+         WHEN '0'  THEN  'No database encryption key present, no encryption'
+         WHEN '1'  THEN  'Unencrypted'
+         WHEN '2'  THEN  'Encryption in progress'
+         WHEN '3'  THEN  'Encrypted'
+         WHEN '4'  THEN  'Key change in progress'
+         WHEN '5'  THEN  'Decryption in progress'
+         WHEN '6'  THEN  'Protection change in progress (The certificate or asymmetric key that is encrypting the database encryption key is being changed.)'
+         ELSE 'No Status'
+         END,
+percent_complete,encryptor_thumbprint, encryptor_type  FROM sys.dm_database_encryption_keys
