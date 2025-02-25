@@ -1,0 +1,86 @@
+USE [DBA]
+GO
+
+/****** Object:  StoredProcedure [dbo].[usp_ConnectionsTrack]    Script Date: 1/30/2025 11:54:48 AM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+ 
+ 
+ 
+CREATE PROCEDURE [dbo].[usp_ConnectionsTrack]
+AS
+ 
+BEGIN
+ 
+SET NOCOUNT ON;
+INSERT INTO [Login_monitoring]
+ SELECT @@ServerName AS SERVER
+,NAME
+,login_time
+,last_batch
+,getdate() AS DATE
+ ,hostname
+,program_name
+,nt_username
+,loginame
+FROM master.sys.databases d
+LEFT JOIN master.dbo.sysprocesses sp ON d.database_id = sp.dbid
+ 
+ 
+END
+
+GO
+
+
+--USE [DBA]
+--GO
+
+--/****** Object:  Table [dbo].[Login_monitoring]    Script Date: 1/30/2025 11:55:10 AM ******/
+--SET ANSI_NULLS ON
+--GO
+
+--SET QUOTED_IDENTIFIER ON
+--GO
+
+--CREATE TABLE [dbo].[Login_monitoring](
+--	[server] [nvarchar](130) NOT NULL,
+--	[name] [nvarchar](130) NOT NULL,
+--	[login_time] [datetime] NULL,
+--	[last_batch] [datetime] NULL,
+--	[date] [datetime] NOT NULL,
+--	[hostname] [nchar](256) NULL,
+--	[program_name] [nchar](256) NULL,
+--	[nt_username] [nchar](256) NULL,
+--	[loginame] [nchar](256) NULL
+--) ON [PRIMARY]
+
+--GO
+
+
+USE [DBA]
+GO
+
+/****** Object:  Table [dbo].[Last_login]    Script Date: 1/30/2025 11:56:18 AM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Last_login](
+	[login name] [nvarchar](100) NOT NULL,
+	[Host Name] [nvarchar](100) NOT NULL,
+	[Program name] [nvarchar](100) NOT NULL,
+	[Login Time] [nvarchar](100) NOT NULL,
+	[Last Request start time] [nvarchar](100) NOT NULL,
+	[Last request end time] [nvarchar](100) NOT NULL
+) ON [PRIMARY]
+
+GO
+
+
+
