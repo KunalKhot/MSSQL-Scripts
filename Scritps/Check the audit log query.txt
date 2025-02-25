@@ -1,0 +1,16 @@
+select * from sys.dm_audit_actions-- check audit classification first 
+
+
+SELECT session_server_principal_name,DATEADD(MINUTE, DATEDIFF(MINUTE, GETUTCDATE(), CURRENT_TIMESTAMP), event_time) AS event_time_afterconvert,*
+ 
+FROM sys.fn_get_audit_file('Audit-20250213-131325_D4CD1D78-5107-4E2B-9A28-0BCE283046A3_0_133848808774220000.sqlaudit',
+ 
+    DEFAULT,
+ 
+    DEFAULT
+ 
+ 
+	)
+
+
+ 
